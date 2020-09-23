@@ -1,20 +1,25 @@
 import java.util.ArrayList;
 
 public class Island {
-	// height and width
+	// height and width in number of grid squares
 	private int width;
 	private int height;
+	// length of each grid square
+	private int gridSize;
 
 	// fields for storing and animals and geographicalFeatures.
 	ArrayList<Animal> animals = new ArrayList<Animal>();
+	ArrayList<Rabbit> rabbits = new ArrayList<Rabbit>();
+	ArrayList<Kiwi> kiwis = new ArrayList<Kiwi>();
 	ArrayList<GeographicalFeature> geographicalFeatures = new ArrayList<GeographicalFeature>();
-	ArrayList<Grass> grassPatches = new ArrayList<Grass>();
-	ArrayList<Water> waterPatches = new ArrayList<Water>();
+	ArrayList<Grass> grasses = new ArrayList<Grass>();
+	ArrayList<Water> waters = new ArrayList<Water>();
 
 	// constructor taking width and height
-	public Island(int width, int height) {
+	public Island(int width, int height, int gridSize) {
 		this.width = width;
 		this.height = height;
+		this.gridSize = gridSize;
 	}
 
 	// check if a grass patch is the coordinate in argument and return the Grass
@@ -25,7 +30,7 @@ public class Island {
 		Grass grass = null;
 
 		// loop through all grass patches
-		for (Grass g : grassPatches) {
+		for (Grass g : grasses) {
 
 			// check if grass' position matches input arguments
 			if (g.getX() == x && g.getY() == y) {
@@ -48,7 +53,7 @@ public class Island {
 		boolean hasWater = false;
 
 		// loop through all water patches
-		for (Water w : waterPatches) {
+		for (Water w : waters) {
 
 			// check if animal's position matches input arguments
 			if (w.getX() == x && w.getY() == y) {
@@ -127,14 +132,14 @@ public class Island {
 				count++;
 			}
 			// create water
-			Water water = new Water(x, y);
+			Water water = new Water(x, y, gridSize);
 
 			// set island on water to this island
 			water.setIsland(this);
 
 			// add water to list of geographical features and water patches
 			this.geographicalFeatures.add(water);
-			this.waterPatches.add(water);
+			this.waters.add(water);
 		}
 	}
 
@@ -159,14 +164,14 @@ public class Island {
 				count++;
 			}
 			// create grass
-			Grass grass = new Grass(size, x, y);
+			Grass grass = new Grass(size, x, y, gridSize);
 
 			// set island on grass to this island
 			grass.setIsland(this);
 
 			// add grass to list of geographical features and grass patches
 			this.geographicalFeatures.add(grass);
-			this.grassPatches.add(grass);
+			this.grasses.add(grass);
 		}
 	}
 
@@ -195,17 +200,17 @@ public class Island {
 			// randomly choose the animal, create the animal and add to lists of animals
 			double rand = Math.random();
 
-			Animal animal = null;
 			if (rand < 0.5) {
-				animal = new Rabbit(x, y, energy);
+				Rabbit rabbit = new Rabbit(x, y, energy, gridSize);
+				rabbits.add(rabbit);
+				rabbit.setIsland(this);
+				animals.add(rabbit);
 			} else if (rand < 1) {
-				animal = new Kiwi(x, y, energy);
+				Kiwi kiwi = new Kiwi(x, y, energy, gridSize);
+				kiwis.add(kiwi);
+				kiwi.setIsland(this);
+				animals.add(kiwi);
 			}
-
-			// add animal to this island's list of animals, set animal's island to this
-			// island
-			this.animals.add(animal);
-			animal.setIsland(this);
 		}
 	}
 
@@ -318,25 +323,42 @@ public class Island {
 		// loop over all animals
 		for (Animal a : this.animals) {
 
-			// check if animal is thirsty
-			if (a.isThirsty()) {
+			// for now just try move randomly *palm face*
+//			boolean movement = a.move(Math.random()); 
+//			while (movement == false) {
+//				movement = a.move(Math.random());
+//			}
+			
+			// something is wrong with the below code.... kiwis aren't moving at all, rabbits disappearing and reappearing :S everything dies
+			
+			
+			// check if animal is hungry
+			if (a.isHungry()) {
 
-				// if animal is thirsty, check for water source and hydrate
-				a.drinkWater();
-
-				// if not thirsty, check if animal is hungry
-			} else if (a.isHungry()) {
-
-				// have animal check for an immediate food source and spend this turn feeding if
-				// so.
+				// have animal check for an immediate food source and spend this turn feeding if so.
 				// if animal is hungry but not at a food source, have the animal seek out food.
 				// this method should invoke movement in the direction of the food source.
 				a.seekFood();
 
+			} else if (a.isThirsty()) {
+				
+				// if the animal is not at a water source,
+				if (!a.drinkWater()) {
+					
+					// attempt to move toward a water source
+					a.seekWater();
+					
+				}
+				
 			} else {
-				// if the animal is not hungry, move randomly. generate random number between 0
-				// and 1 and attempt to move the animal in that direction.
-				a.move(Math.random());
+				
+				// both the seekfood and seekwater methods have built in the repeated attempts until a movement is found.....
+				
+				// have the animal attempt to move in a random direction until a movement happens (the direction to move in isn't blocked)
+				boolean movement = a.move(Math.random()); 
+				while (movement == false) {
+					movement = a.move(Math.random());
+				}
 			}
 
 			// reduce all animal's energy and hydration level by default amount
@@ -351,16 +373,18 @@ public class Island {
 
 		// remove dead animals from island (no feeding on dead bodies here...)
 		for (Animal d : deadAnimals) {
+			d.setDead(true);
 			this.animals.remove(d);
 		}
 
 		// list of plants to remove if they've been eaten away. just grass for now
 		ArrayList<Grass> deadGrass = new ArrayList<Grass>();
 
-		for (Grass g : grassPatches) {
+		for (Grass g : grasses) {
 			// check if any grass patches have had their size reduce to 0 from being eaten
 			if (g.getSize() == 0) {
 				deadGrass.add(g);
+				g.setDead(true);
 			} else {
 				// otherwise, grow that grass
 				g.increaseSize();
@@ -416,6 +440,22 @@ public class Island {
 
 	public void removeAnimal(Animal animal) {
 		this.animals.remove(animal);
+	}
+
+	public ArrayList<Rabbit> getRabbits() {
+		return rabbits;
+	}
+
+	public ArrayList<Kiwi> getKiwis() {
+		return kiwis;
+	}
+
+	public ArrayList<Grass> getGrasses() {
+		return grasses;
+	}
+	
+	public ArrayList<Water> getWaters() {
+		return waters;
 	}
 
 	public void reportNumAnimals() {
