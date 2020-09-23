@@ -5,10 +5,14 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
 
 public class UserInterface extends Application {
 
@@ -16,7 +20,8 @@ public class UserInterface extends Application {
 	private int radius = 10;
 	private int gridWidth = 20, gridHeight = 10;
 	private int width = gridWidth * 2 * radius + radius;
-	private int height = gridHeight * 2 * radius + radius;
+	private int btnHeight = 40;
+	private int height = gridHeight * 2 * radius + radius + btnHeight;
 	
 	// declare island related fields
 	private Island island;
@@ -24,6 +29,12 @@ public class UserInterface extends Application {
 	private ArrayList<Kiwi> kiwis;
 	private ArrayList<Grass> grasses;
 	private ArrayList<Water> waters;
+	
+	// declare javaFX objects 
+	Button playPauseButton;
+	boolean isPaused;
+	VBox pane;
+	Timeline timeline;
 	
 	// ----------------------------------------------------------------------------------------- //
 	
@@ -38,31 +49,28 @@ public class UserInterface extends Application {
 		island.genWater(10);
 		island.reportNumAnimals();
 
+		// fetch animals and geographic features
 		rabbits = island.getRabbits();
 		kiwis = island.getKiwis();
 		grasses = island.getGrasses();
 		waters = island.getWaters();
 		
-		// create a group
-		Group root = new Group();
-		
-		// add animals and geographic features to the group
+		// create a group to hold the animals and geographic features
+		Group islandObjects = new Group();
 		for (Rabbit r : rabbits) {
-			root.getChildren().add(r);
+			islandObjects.getChildren().add(r);
 		}
 		for (Kiwi k : kiwis) {
-			root.getChildren().add(k);
+			islandObjects.getChildren().add(k);
 		}
 		for (Grass g : grasses) {
-			root.getChildren().add(g);
+			islandObjects.getChildren().add(g);
 		}
 		for (Water w : waters) {
-			root.getChildren().add(w);
+			islandObjects.getChildren().add(w);
 		}
-		
-		// create scene on root group
-		Scene scene = new Scene(root, width, height);
-	
+
+		// define keyframe action
 		KeyFrame frame = new KeyFrame(Duration.millis(500), new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
@@ -73,7 +81,7 @@ public class UserInterface extends Application {
 				for (Rabbit r : rabbits) {
 					// what if the rabbit dies? give it a check!
 					if (r.isDead()) {
-						root.getChildren().remove(r);
+						islandObjects.getChildren().remove(r);
 					} else {
 						// update the position
 						r.setTranslateX(r.getPosCenterX());
@@ -84,7 +92,7 @@ public class UserInterface extends Application {
 				}
 				for (Kiwi k : kiwis) {
 					if (k.isDead()) {
-						root.getChildren().remove(k);
+						islandObjects.getChildren().remove(k);
 					} else {
 						// update the position
 						k.setTranslateX(k.getPosCenterX());
@@ -94,18 +102,50 @@ public class UserInterface extends Application {
 				}
 				for (Grass g : grasses) {
 					if (g.isDead()) {
-						root.getChildren().remove(g);
+						islandObjects.getChildren().remove(g);
 					}
 				}
 				island.reportNumAnimals();
 			}
+			
 		});
 		
-		// create timeline and add keyframe.
-		final Timeline timeline = new Timeline();
+		// instantiate timeline and add keyframe.
+//		final Timeline timeline = new Timeline();
+		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.getKeyFrames().add(frame);
-		timeline.play();
+//		timeline.play();
+//		isPaused = false;
+		isPaused = true;
+		
+		// create play/pause button to control island animation
+		playPauseButton = new Button();
+		playPauseButton.setText("Play");
+		playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				if (isPaused) {
+					// restart the timeline play... how we do this?
+					timeline.play();
+					playPauseButton.setText("Pause");
+					isPaused = false;
+				} else {
+					timeline.pause();
+					playPauseButton.setText("Play");
+					isPaused = true;
+				}
+			}
+		});
+		
+		// create a vbox to store the animal group and also the um. play/pause button
+		pane = new VBox();
+		pane.getChildren().add(islandObjects);
+		pane.getChildren().add(playPauseButton);
+		pane.setAlignment(Pos.BOTTOM_CENTER);
+		
+		// create scene on islandObjects group
+		Scene scene = new Scene(pane, width, height);
 		
 		primaryStage.setTitle("The Animated Island");
 		primaryStage.setScene(scene);
