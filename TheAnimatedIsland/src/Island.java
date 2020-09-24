@@ -33,7 +33,7 @@ public class Island {
 		for (Grass g : grasses) {
 
 			// check if grass' position matches input arguments
-			if (g.getX() == x && g.getY() == y) {
+			if (g.getGridX() == x && g.getGridY() == y) {
 
 				// set grass in variable and break out of loop
 				grass = g;
@@ -56,7 +56,7 @@ public class Island {
 		for (Water w : waters) {
 
 			// check if animal's position matches input arguments
-			if (w.getX() == x && w.getY() == y) {
+			if (w.getGridX() == x && w.getGridY() == y) {
 
 				// set boolean to true and break out of loop
 				hasWater = true;
@@ -79,7 +79,7 @@ public class Island {
 		for (Animal b : animals) {
 
 			// check if animal's position matches input arguments
-			if (b.getX() == x && b.getY() == y) {
+			if (b.getGridX() == x && b.getGridY() == y) {
 
 				// set boolean to true and break out of loop
 				isOccupied = true;
@@ -102,7 +102,7 @@ public class Island {
 		for (GeographicalFeature g : geographicalFeatures) {
 
 			// check if feature's position matches input arguments
-			if (g.getX() == x && g.getY() == y) {
+			if (g.getGridX() == x && g.getGridY() == y) {
 
 				// set boolean to true and break out of loop
 				hasFeature = true;
@@ -194,8 +194,8 @@ public class Island {
 				count++;
 			}
 
-			// randomly pick energy level from 5 through 30.
-			int energy = (int) (Math.random() * 25 + 5);
+			// randomly pick energy level from 25 through 100.
+			int energy = (int) (Math.random() * 25 + 75);
 
 			// randomly choose the animal, create the animal and add to lists of animals
 			double rand = Math.random();
@@ -256,7 +256,7 @@ public class Island {
 
 					// check if animal is in this position. at most one animal will be as we are
 					// preventing multiple objects from occupying the same position
-					if (b.getX() == x && b.getY() == y) {
+					if (b.getGridX() == x && b.getGridY() == y) {
 
 						// set flag to true
 						hasObject = true;
@@ -277,7 +277,7 @@ public class Island {
 
 						// check if animal is in this position. at most one animal will be as we are
 						// preventing multiple objects from occupying the same position
-						if (p.getX() == x && p.getY() == y) {
+						if (p.getGridX() == x && p.getGridY() == y) {
 
 							// set flag to true
 							hasObject = true;
@@ -348,16 +348,18 @@ public class Island {
 					// attempt to move toward a water source
 					a.seekWater();
 					
+				} else {
+					// drink that water
+					a.drinkWater();
 				}
 				
 			} else {
-				
-				// both the seekfood and seekwater methods have built in the repeated attempts until a movement is found.....
-				
-				// have the animal attempt to move in a random direction until a movement happens (the direction to move in isn't blocked)
-				boolean movement = a.move(Math.random()); 
-				while (movement == false) {
+				// have the animal attempt to move in a random direction until a movement happens (the direction to move in isn't blocked) up to 20 tries
+				boolean movement = a.move(Math.random());
+				int count = 0;
+				while (movement == false && count < 20) {
 					movement = a.move(Math.random());
+					count++;
 				}
 			}
 
@@ -407,8 +409,7 @@ public class Island {
 		}
 	}
 
-	// Getters and Setters. Note no setter for animals arrayList but has addAnimal
-	// and removeAnimal methods instead
+	// Getters and Setters. Note no setter for animals arrayList but has addAnimal and removeAnimal methods instead
 
 	public int getWidth() {
 		return width;
@@ -431,9 +432,8 @@ public class Island {
 	}
 
 	public void addAnimal(Animal animal) {
-		// check incoming animal's position is not already occupied before adding to
-		// island
-		if (!isOccupied(animal.getX(), animal.getY())) {
+		// check incoming animal's position is not already occupied before adding to island
+		if (!isOccupied(animal.getGridX(), animal.getGridY())) {
 			this.animals.add(animal);
 		}
 	}

@@ -1,7 +1,7 @@
 
 public interface GeographicalFeature {
-	public int getX();
-	public int getY();
+	public int getGridX();
+	public int getGridY();
 	public char getSymbol();
 	public Island getIsland();
 	public void setIsland(Island island);

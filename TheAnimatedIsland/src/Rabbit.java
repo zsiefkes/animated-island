@@ -1,7 +1,7 @@
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
-public class Rabbit extends Circle implements Animal {
+public class Rabbit extends ImageView implements Animal {
 
 	// i just want the rabbit to be able to move. let's start by making our userinterface display circles associated to rabbits. steps to that:
 	// - instead of circles, we could just have an image represent each animal instead of a symbol, and print that shit..... but whatever, let's start with circles I guess so we can use gettranslate and all that rubbish?
@@ -18,12 +18,12 @@ public class Rabbit extends Circle implements Animal {
 
 	// constructor function taking position and energy level as arguments. does not initiate with an island.
 	public Rabbit(int x, int y, int energy, int gridSize) {
+		super(new Image("rabbit.png", gridSize, gridSize, false, false));
 		// rabbits inherit from the Circle class, and so also need to be instantiated with the attributes a Circle requires, i.e. translateX, translateY, and radius
 		// the x, y position should be the gridSize * x + gridSize / 2, gridSize * y. radius is gridSize / 2
 //		super(gridSize * x + gridSize / 2, gridSize * y + gridSize / 2, gridSize / 2);
-		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
-		this.setFill(Color.DARKGRAY); // rabbits are grey
-
+//		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
+//		this.setFill(Color.DARKGRAY); // rabbits are grey
 		this.x = x;
 		this.y = y;
 		this.gridSize = gridSize;
@@ -112,25 +112,26 @@ public class Rabbit extends Circle implements Animal {
 	
 	// overloaded method. if no distance provided, apply default or pick randomly between options.
 	public boolean move(double direction) {
-		// rabbits can move one or two cells at a time. pick randomly.
-		int distance = (int)(Math.random()*2 + 1);
-		return move(direction, distance);
+//		// rabbits can move one or two cells at a time. pick randomly.
+//		int distance = (int)(Math.random()*2 + 1);
+		// not a fan of the jumpiness here. just let them move one cell at a time.
+		return move(direction, 1);
 	}
 	
 	// food related methods
 	public boolean isHungry() {
 		// return whether energy level is below a certain threshold
-		return (energy < 10);
+		return (energy < 35);
 	}
 	
 	public boolean isThirsty() {
-		return (hydration < 6);
+		return (hydration < 35);
 	}
 
 	public boolean drinkWater() {
 		// check if rabbit is at water source and increase hydration if so
 		if (island.hasWater(x, y)) {
-			increaseHydration(20);
+			increaseHydration(50);
 			return true;
 		} else {
 			return false;
@@ -142,7 +143,7 @@ public class Rabbit extends Circle implements Animal {
 		Grass grass = island.hasGrass(x, y);
 		if (grass != null) {
 			grass.decreaseSize(4);
-			increaseEnergy(10);
+			increaseEnergy(50);
 			return true;
 		} else {
 			return false;
@@ -159,37 +160,44 @@ public class Rabbit extends Circle implements Animal {
 			drinkWater();
 			
 			// if grass is detected, move towards that patch of water
+			
 			// try to move east first if there is water towards the east
 		} else if (island.hasWater(x + 1, y) != false || island.hasWater(x + 1, y + 1) != false || island.hasWater(x + 1, y - 1) != false || island.hasWater(x + 1, y + 2) != false || island.hasWater(x + 1, y - 2) != false) {
 			movement = move(0.3, 1);
 		} else if (island.hasWater(x + 2, y) != false || island.hasWater(x + 2, y + 1) != false || island.hasWater(x + 2, y - 1) != false || island.hasWater(x + 2, y + 2) != false || island.hasWater(x + 2, y - 2) != false) {
-			movement = move(0.3, 2);
+			movement = move(0.3, 1);
+//			movement = move(0.3, 2);
 			
 			// try to move west first if there is water towards the west
 		} else if (island.hasWater(x - 1, y) != false || island.hasWater(x - 1, y + 1) != false || island.hasWater(x - 1, y - 1) != false || island.hasWater(x - 1, y + 2) != false || island.hasWater(x - 1, y - 2) != false) {
 			movement = move(0.8, 1);
 		} else if (island.hasWater(x - 2, y) != false || island.hasWater(x - 2, y + 1) != false || island.hasWater(x - 2, y - 1) != false || island.hasWater(x - 2, y + 2) != false || island.hasWater(x - 2, y - 2) != false) {
-			movement = move(0.8, 2);
+			movement = move(0.8, 1);
+//			movement = move(0.8, 2);
 			
 			// if there is water directly north, head north
 		} else if (island.hasWater(x, y - 1) != false) {
 			movement = move(0.1, 1);
 		} else if (island.hasWater(x, y - 2) != false) {
-			movement = move(0.1, 2);
+			movement = move(0.1, 1);
+//			movement = move(0.1, 2);
 			
 			// if there is water directly south, head south
 		} else if (island.hasWater(x, y + 1) != false) {
 			movement = move (0.6, 1);
 		} else if (island.hasWater(x, y + 2) != false) {
-			movement = move (0.6, 2);
+			movement = move (0.6, 1);
+//			movement = move (0.6, 2);
 			
 		} else {
 			// if no nearby grass is detected, move randomly in search of water.
 			movement = move(Math.random(), (int)(Math.random()*2 + 1));
 		}
-		// if no movement has occurred, keep attempting to move randomly
-		while (!movement) {
+		// if no movement has occurred, keep attempting to move randomly up to 10 tries
+		int numTries = 0;
+		while (!movement && numTries < 10) {
 			movement = move(Math.random(), (int)(Math.random()*2 + 1));
+			numTries++;
 		}
 		
 		return movement;
@@ -210,33 +218,39 @@ public class Rabbit extends Circle implements Animal {
 		} else if (island.hasGrass(x + 1, y) != null || island.hasGrass(x + 1, y + 1) != null || island.hasGrass(x + 1, y - 1) != null || island.hasGrass(x + 1, y + 2) != null || island.hasGrass(x + 1, y - 2) != null) {
 			movement = move(0.3, 1);
 		} else if (island.hasGrass(x + 2, y) != null || island.hasGrass(x + 2, y + 1) != null || island.hasGrass(x + 2, y - 1) != null || island.hasGrass(x + 2, y + 2) != null || island.hasGrass(x + 2, y - 2) != null) {
-			movement = move(0.3, 2);
+//			movement = move(0.3, 2);
+			movement = move(0.3, 1);
 			
 		// try to move west first if there is food towards the west
 		} else if (island.hasGrass(x - 1, y) != null || island.hasGrass(x - 1, y + 1) != null || island.hasGrass(x - 1, y - 1) != null || island.hasGrass(x - 1, y + 2) != null || island.hasGrass(x - 1, y - 2) != null) {
 			movement = move(0.8, 1);
 		} else if (island.hasGrass(x - 2, y) != null || island.hasGrass(x - 2, y + 1) != null || island.hasGrass(x - 2, y - 1) != null || island.hasGrass(x - 2, y + 2) != null || island.hasGrass(x - 2, y - 2) != null) {
-			movement = move(0.8, 2);
+//			movement = move(0.8, 2);
+			movement = move(0.8, 1);
 			
 		// if there is food directly north, head north
 		} else if (island.hasGrass(x, y - 1) != null) {
 			movement = move(0.1, 1);
 		} else if (island.hasGrass(x, y - 2) != null) {
-			movement = move(0.1, 2);
+//			movement = move(0.1, 2);
+			movement = move(0.1, 1);
 			
 		// if there is food directly south, head south
 		} else if (island.hasGrass(x, y + 1) != null) {
 			movement = move (0.6, 1);
 		} else if (island.hasGrass(x, y + 2) != null) {
-			movement = move (0.6, 2);
+//			movement = move (0.6, 2);
+			movement = move (0.6, 1);
 			
 		} else {
 			// if no nearby grass is detected, move randomly in search of food.
-			movement = move(Math.random(), (int)(Math.random()*2 + 1));
+//			movement = move(Math.random(), (int)(Math.random()*2 + 1));
+			movement = move(Math.random());
 		}
 		// if no movement has occurred, keep attempting to move randomly
 		while (!movement) {
-			movement = move(Math.random(), (int)(Math.random()*2 + 1));
+//			movement = move(Math.random(), (int)(Math.random()*2 + 1));
+			movement = move(Math.random());
 		}
 		
 		return movement;
@@ -244,32 +258,21 @@ public class Rabbit extends Circle implements Animal {
 
 	// Getters and setters
 
-	// return position of center of circle for purpose of displaying in GUI
-	// getters that multiply x, y coordinates by the gridSize and add half of it! :)
-	public int getPosCenterX() {
-//		return x * gridSize + gridSize / 2; 
-		return x * gridSize + gridSize; 
+	// returns coordinates of top-left point of square image for displaying on grid
+	public int getPosX() {
+		return x * gridSize; 
 	}
-	public int getPosCenterY() {
-//		return y * gridSize + gridSize / 2; 
-		return y * gridSize + gridSize; 
+	public int getPosY() {
+		return y * gridSize; 
 	}
 	
-	// positions within grid
-	public int getX() {
+	// positions within grid coordinates
+	public int getGridX() {
 		return x;
 	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public int getY() {
+//
+	public int getGridY() {
 		return y;
-	}
-
-	public void setY(int y) {
-		this.y = y;
 	}
 	
 	public int getEnergy() {

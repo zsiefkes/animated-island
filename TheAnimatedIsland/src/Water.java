@@ -1,7 +1,9 @@
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-public class Water extends Circle implements GeographicalFeature {
+public class Water extends ImageView implements GeographicalFeature {
 	// instance attributes
 	private char symbol = '~'; 
 	private int x; // horizontal position on grid
@@ -11,9 +13,7 @@ public class Water extends Circle implements GeographicalFeature {
 
 	// constructor
 	public Water(int x, int y, int gridSize) {
-//		super(gridSize * x + gridSize / 2, gridSize * y + gridSize / 2, gridSize / 2);
-		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
-		this.setFill(Color.LIGHTSKYBLUE); // water is blue
+		super(new Image("water.png", gridSize, gridSize, false, false));
 		this.x = x;
 		this.y = y;
 		this.gridSize = gridSize;
@@ -22,15 +22,24 @@ public class Water extends Circle implements GeographicalFeature {
 	}
 	
 	// getters and setters
+	
+	// returns coordinates of top-left point of square image for displaying on grid
+	public int getPosX() {
+		return x * gridSize; 
+	}
+	public int getPosY() {
+		return y * gridSize; 
+	}
+
 	public char getSymbol() {
 		return symbol;
 	}
 
-	public int getX() {
+	public int getGridX() {
 		return x;
 	}
 
-	public int getY() {
+	public int getGridY() {
 		return y;
 	}
 

@@ -1,7 +1,9 @@
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-public class Grass extends Circle implements GeographicalFeature {
+public class Grass extends ImageView implements GeographicalFeature {
 
 	// instance attributes
 	private int size;
@@ -14,9 +16,10 @@ public class Grass extends Circle implements GeographicalFeature {
 
 	// constructor
 	public Grass(int size,  int x, int y, int gridSize) {
+		super(new Image("grass.png", gridSize, gridSize, false, false));
 //		super(gridSize * x + gridSize / 2, gridSize * y + gridSize / 2, gridSize / 2);
-		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
-		this.setFill(Color.DARKOLIVEGREEN); // grasses are green
+//		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
+//		this.setFill(Color.DARKOLIVEGREEN); // grasses are green
 		this.size = size;
 		this.x = x;
 		this.y = y;
@@ -27,33 +30,43 @@ public class Grass extends Circle implements GeographicalFeature {
 	}
 	
 	// getters and setters
+	
+	// returns coordinates of top-left point of square image for displaying on grid
+	public int getPosX() {
+		return x * gridSize; 
+	}
+	public int getPosY() {
+		return y * gridSize; 
+	}
+	
 	public int getSize() {
 		return size;
 	}
 
-	// increase and decrease size. overloaded methods - optional increment argument.
-	public void increaseSize() {
-		this.size++;
-	}
-	public void decreaseSize() {
-		this.size--;
-	}
+	// increase and decrease size of plant by optional increment argument.
 	public void increaseSize(int increment) {
 		this.size = this.size + increment;
 	}
 	public void decreaseSize(int increment) {
 		this.size = this.size - increment;
 	}
+	// overloaded methods taking no argument - increase and decrease size of plant by 1
+	public void increaseSize() {
+		this.size++;
+	}
+	public void decreaseSize() {
+		this.size--;
+	}
 
 	public char getSymbol() {
 		return symbol;
 	}
 
-	public int getX() {
+	public int getGridX() {
 		return x;
 	}
 
-	public int getY() {
+	public int getGridY() {
 		return y;
 	}
 

@@ -1,7 +1,7 @@
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
-public class Kiwi extends Circle implements Animal {
+public class Kiwi extends ImageView implements Animal {
 	// instance attributes
 	private char symbol = 'K';
 	private int x; // horizontal position
@@ -12,31 +12,13 @@ public class Kiwi extends Circle implements Animal {
 	private boolean isDead;
 	private Island island; // island the kiwi belongs to, if any.
 
-	// overloaded constructor, takes no arguments and sets pre-defined attributes
-	public Kiwi() {
-		super(100, 100, 10);
-		this.setFill(Color.SADDLEBROWN); // kiwis are brown
-		// set default values
-		this.x = 10;
-		this.y = 10;
-		this.gridSize = 10;
-		this.energy = 100;
-		this.hydration = 50;
-		this.isDead = false;
-		this.island = null;
-	}
-
-	// overloaded constructor function taking position and energy level as
-	// arguments. does not initiate with an island.
+	// constructor function taking position energy level and gridSize as arguments. does not initiate with an island.
 	public Kiwi(int x, int y, int energy, int gridSize) {
-		// rabbits inherit from the Circle class, and so also need to be instantiated with the attributes a Circle requires, i.e. translateX, translateY, and radius
-		// the x, y position should be the gridSize * x + gridSize / 2, gridSize * y. radius is gridSize / 2
-//		super(gridSize * x + gridSize / 2, gridSize * y + gridSize / 2, gridSize / 2);
-		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
-		this.setFill(Color.SADDLEBROWN); // kiwis are brown
+		super(new Image("kiwi.png", gridSize, gridSize, false, false));
 		this.x = x;
 		this.y = y;
 		this.energy = energy;
+		this.gridSize = gridSize;
 		this.hydration = 50;
 		this.island = null;
 	}
@@ -131,7 +113,7 @@ public class Kiwi extends Circle implements Animal {
 	public boolean drinkWater() {
 		// check if rabbit is at water source and increase hydration if so
 		if (island.hasWater(x, y)) {
-			increaseHydration(20);
+			increaseHydration(40);
 			return true;
 		} else {
 			return false;
@@ -140,7 +122,7 @@ public class Kiwi extends Circle implements Animal {
 	
 	// kiwis can feed anywhere on grubs under the ground :) 
 	public boolean feedSelf() {
-		increaseEnergy(10);
+		increaseEnergy(15);
 		return true;
 	}
 	
@@ -189,9 +171,11 @@ public class Kiwi extends Circle implements Animal {
 			// if no nearby water is detected, move randomly in search of food.
 			movement = move(Math.random());
 		}
-		// if no movement has occurred, keep attempting to move randomly
-		while (!movement) {
+		// if no movement has occurred, keep attempting to move randomly up to 10 tries
+		int numTries = 0;
+		while (!movement && numTries < 10) {
 			movement = move(Math.random());
+			numTries++;
 		}
 		
 		return movement;
@@ -199,35 +183,24 @@ public class Kiwi extends Circle implements Animal {
 	
 	// Getters and setters
 
-	// return position of center of circle for purpose of displaying in GUI
-	// getters that multiply x, y coordinates by the gridSize and add half of it! :)
-	public int getPosCenterX() {
-//		return x * gridSize + gridSize / 2; 
-		return x * gridSize + gridSize; 
+	// returns coordinates of top-left point of square image for displaying on grid
+	public int getPosX() {
+		return x * gridSize; 
 	}
-	public int getPosCenterY() {
-//		return y * gridSize + gridSize / 2; 
-		return y * gridSize + gridSize; 
+	public int getPosY() {
+		return y * gridSize; 
+	}
+	
+	// positions within grid coordinates
+	public int getGridX() {
+		return x;
+	}
+	public int getGridY() {
+		return y;
 	}
 
 	public char getSymbol() {
 		return symbol;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public void setY(int y) {
-		this.y = y;
 	}
 
 	public int getEnergy() {

@@ -4,8 +4,8 @@ public interface Animal {
 	public boolean move(double direction);
 	
 	// locate
-	public int getX();
-	public int getY();
+	public int getGridX();
+	public int getGridY();
 	
 	// getters
 	public char getSymbol();

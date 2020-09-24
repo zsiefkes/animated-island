@@ -6,9 +6,9 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -16,12 +16,12 @@ import javafx.util.Duration;
 
 public class UserInterface extends Application {
 
-	// set display sizes. width and height of window are determined by gridWidth, gridHeight and radius of object avatars (circles).
-	private int radius = 10;
-	private int gridWidth = 20, gridHeight = 10;
-	private int width = gridWidth * 2 * radius + radius;
-	private int btnHeight = 40;
-	private int height = gridHeight * 2 * radius + radius + btnHeight;
+	// set display sizes. width and height of window are determined by gridWidth, gridHeight and gridSize (length of square grid tiles)
+	private int gridSize = 20;
+	private int gridWidth = 30, gridHeight = 15;
+	private int width = gridWidth * gridSize;
+	private int height = gridHeight * gridSize;
+	private int btnHeight = 40; // additional height to add to bottom of window for pause/play button
 	
 	// declare island related fields
 	private Island island;
@@ -33,8 +33,10 @@ public class UserInterface extends Application {
 	// declare javaFX objects 
 	Button playPauseButton;
 	boolean isPaused;
-	VBox pane;
+	VBox layout;
 	Timeline timeline;
+	Pane islandObjects;
+	Scene scene;
 	
 	// ----------------------------------------------------------------------------------------- //
 	
@@ -43,10 +45,10 @@ public class UserInterface extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		
 		// create island
-		island = new Island(gridWidth, gridHeight, radius * 2);
-		island.genAnimals(10);
-		island.genGrass(20);
-		island.genWater(10);
+		island = new Island(gridWidth, gridHeight, gridSize);
+		island.genAnimals(20);
+		island.genGrass(40);
+		island.genWater(20);
 		island.reportNumAnimals();
 
 		// fetch animals and geographic features
@@ -55,8 +57,9 @@ public class UserInterface extends Application {
 		grasses = island.getGrasses();
 		waters = island.getWaters();
 		
-		// create a group to hold the animals and geographic features
-		Group islandObjects = new Group();
+		// create a pane to hold the animals and geographic features
+		islandObjects = new Pane();
+		islandObjects.setMinSize(width, height);
 		for (Rabbit r : rabbits) {
 			islandObjects.getChildren().add(r);
 		}
@@ -70,6 +73,10 @@ public class UserInterface extends Application {
 			islandObjects.getChildren().add(w);
 		}
 
+		// set initial positions
+		positionGeographicalFeatures();
+		updateIslandObjects();
+		
 		// define keyframe action
 		KeyFrame frame = new KeyFrame(Duration.millis(500), new EventHandler<ActionEvent>() {
 			@Override
@@ -78,45 +85,15 @@ public class UserInterface extends Application {
 				island.updateIsland();
 
 				// update positions and remove nodes from group if they have died
-				for (Rabbit r : rabbits) {
-					// what if the rabbit dies? give it a check!
-					if (r.isDead()) {
-						islandObjects.getChildren().remove(r);
-					} else {
-						// update the position
-						r.setTranslateX(r.getPosCenterX());
-						r.setTranslateX(r.getPosCenterY());
-					}
-					// print rabbit info
-					System.out.println(r.toString());
-				}
-				for (Kiwi k : kiwis) {
-					if (k.isDead()) {
-						islandObjects.getChildren().remove(k);
-					} else {
-						// update the position
-						k.setTranslateX(k.getPosCenterX());
-						k.setTranslateX(k.getPosCenterY());
-					}
-					System.out.println(k.toString());
-				}
-				for (Grass g : grasses) {
-					if (g.isDead()) {
-						islandObjects.getChildren().remove(g);
-					}
-				}
-				island.reportNumAnimals();
+				updateIslandObjects();
 			}
 			
 		});
 		
 		// instantiate timeline and add keyframe.
-//		final Timeline timeline = new Timeline();
 		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.getKeyFrames().add(frame);
-//		timeline.play();
-//		isPaused = false;
 		isPaused = true;
 		
 		// create play/pause button to control island animation
@@ -126,7 +103,6 @@ public class UserInterface extends Application {
 			@Override
 			public void handle(ActionEvent arg0) {
 				if (isPaused) {
-					// restart the timeline play... how we do this?
 					timeline.play();
 					playPauseButton.setText("Pause");
 					isPaused = false;
@@ -139,17 +115,62 @@ public class UserInterface extends Application {
 		});
 		
 		// create a vbox to store the animal group and also the um. play/pause button
-		pane = new VBox();
-		pane.getChildren().add(islandObjects);
-		pane.getChildren().add(playPauseButton);
-		pane.setAlignment(Pos.BOTTOM_CENTER);
+		layout = new VBox();
+		layout.getChildren().add(islandObjects);
+		layout.getChildren().add(playPauseButton);
+		layout.setAlignment(Pos.BOTTOM_CENTER);
 		
 		// create scene on islandObjects group
-		Scene scene = new Scene(pane, width, height);
+		scene = new Scene(layout, width, height + btnHeight);
 		
 		primaryStage.setTitle("The Animated Island");
 		primaryStage.setScene(scene);
 		primaryStage.show();
+	}
+	
+	private void updateIslandObjects() {
+		for (Rabbit r : rabbits) {
+			// check if rabbit has died
+			if (r.isDead()) {
+				islandObjects.getChildren().remove(r);
+			} else {
+				// update the position
+				r.setX(r.getPosX());
+				r.setY(r.getPosY());
+			}
+			// print rabbit info
+			System.out.println(r.toString());
+		}
+		for (Kiwi k : kiwis) {
+			if (k.isDead()) {
+				islandObjects.getChildren().remove(k);
+			} else {
+				// update the position
+				k.setX(k.getPosX());
+				k.setY(k.getPosY());
+			}
+			System.out.println(k.toString());
+		}
+		for (Grass g : grasses) {
+			// check if plant is dead and remove if so
+			if (g.isDead()) {
+				islandObjects.getChildren().remove(g);
+			}
+		}
+		island.reportNumAnimals();
+	}
+	
+	private void positionGeographicalFeatures() {
+		for (Grass g : grasses) {
+			// set position
+			g.setX(g.getPosX());
+			g.setY(g.getPosY());
+		}
+		for (Water w : waters) {
+			// set position
+			w.setX(w.getPosX());
+			w.setY(w.getPosY());
+		}
 	}
 	
 	public static void main(String[] args) {
