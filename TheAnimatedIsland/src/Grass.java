@@ -1,7 +1,5 @@
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 
 public class Grass extends ImageView implements GeographicalFeature {
 
@@ -17,9 +15,6 @@ public class Grass extends ImageView implements GeographicalFeature {
 	// constructor
 	public Grass(int size,  int x, int y, int gridSize) {
 		super(new Image("grass.png", gridSize, gridSize, false, false));
-//		super(gridSize * x + gridSize / 2, gridSize * y + gridSize / 2, gridSize / 2);
-//		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
-//		this.setFill(Color.DARKOLIVEGREEN); // grasses are green
 		this.size = size;
 		this.x = x;
 		this.y = y;

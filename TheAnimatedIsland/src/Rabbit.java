@@ -3,9 +3,6 @@ import javafx.scene.image.ImageView;
 
 public class Rabbit extends ImageView implements Animal {
 
-	// i just want the rabbit to be able to move. let's start by making our userinterface display circles associated to rabbits. steps to that:
-	// - instead of circles, we could just have an image represent each animal instead of a symbol, and print that shit..... but whatever, let's start with circles I guess so we can use gettranslate and all that rubbish?
-
 	// instance attributes
 	private char symbol = 'R';
 	private int x; // horizontal position on grid
@@ -19,11 +16,6 @@ public class Rabbit extends ImageView implements Animal {
 	// constructor function taking position and energy level as arguments. does not initiate with an island.
 	public Rabbit(int x, int y, int energy, int gridSize) {
 		super(new Image("rabbit.png", gridSize, gridSize, false, false));
-		// rabbits inherit from the Circle class, and so also need to be instantiated with the attributes a Circle requires, i.e. translateX, translateY, and radius
-		// the x, y position should be the gridSize * x + gridSize / 2, gridSize * y. radius is gridSize / 2
-//		super(gridSize * x + gridSize / 2, gridSize * y + gridSize / 2, gridSize / 2);
-//		super(gridSize * x + gridSize, gridSize * y + gridSize, gridSize / 2);
-//		this.setFill(Color.DARKGRAY); // rabbits are grey
 		this.x = x;
 		this.y = y;
 		this.gridSize = gridSize;
@@ -91,11 +83,8 @@ public class Rabbit extends ImageView implements Animal {
 
 			// next, check it did not move to a spot already occupied by another animal.
 			if (island.isOccupied(newX, newY)) {
-
-				// if it is, move it back to its original position
 				newX = initX;
 				newY = initY;
-				
 				return false;
 			}
 		}
@@ -112,10 +101,10 @@ public class Rabbit extends ImageView implements Animal {
 	
 	// overloaded method. if no distance provided, apply default or pick randomly between options.
 	public boolean move(double direction) {
-//		// rabbits can move one or two cells at a time. pick randomly.
-//		int distance = (int)(Math.random()*2 + 1);
-		// not a fan of the jumpiness here. just let them move one cell at a time.
-		return move(direction, 1);
+		
+		// rabbits can move one or two cells at a time. pick randomly.
+		int distance = (int)(Math.random()*2 + 1);
+		return move(direction, distance);
 	}
 	
 	// food related methods
@@ -151,7 +140,7 @@ public class Rabbit extends ImageView implements Animal {
 	}
 	
 	public boolean seekWater() {
-		// flag whether movement has occured
+		// flag whether movement has occurred
 		boolean movement = false;
 		
 		// rabbits can detect water up up to two cells away (square of side length 5 cells)
@@ -165,32 +154,28 @@ public class Rabbit extends ImageView implements Animal {
 		} else if (island.hasWater(x + 1, y) != false || island.hasWater(x + 1, y + 1) != false || island.hasWater(x + 1, y - 1) != false || island.hasWater(x + 1, y + 2) != false || island.hasWater(x + 1, y - 2) != false) {
 			movement = move(0.3, 1);
 		} else if (island.hasWater(x + 2, y) != false || island.hasWater(x + 2, y + 1) != false || island.hasWater(x + 2, y - 1) != false || island.hasWater(x + 2, y + 2) != false || island.hasWater(x + 2, y - 2) != false) {
-			movement = move(0.3, 1);
-//			movement = move(0.3, 2);
+			movement = move(0.3, 2);
 			
 			// try to move west first if there is water towards the west
 		} else if (island.hasWater(x - 1, y) != false || island.hasWater(x - 1, y + 1) != false || island.hasWater(x - 1, y - 1) != false || island.hasWater(x - 1, y + 2) != false || island.hasWater(x - 1, y - 2) != false) {
 			movement = move(0.8, 1);
 		} else if (island.hasWater(x - 2, y) != false || island.hasWater(x - 2, y + 1) != false || island.hasWater(x - 2, y - 1) != false || island.hasWater(x - 2, y + 2) != false || island.hasWater(x - 2, y - 2) != false) {
-			movement = move(0.8, 1);
-//			movement = move(0.8, 2);
+			movement = move(0.8, 2);
 			
 			// if there is water directly north, head north
 		} else if (island.hasWater(x, y - 1) != false) {
 			movement = move(0.1, 1);
 		} else if (island.hasWater(x, y - 2) != false) {
-			movement = move(0.1, 1);
-//			movement = move(0.1, 2);
+			movement = move(0.1, 2);
 			
 			// if there is water directly south, head south
 		} else if (island.hasWater(x, y + 1) != false) {
 			movement = move (0.6, 1);
 		} else if (island.hasWater(x, y + 2) != false) {
-			movement = move (0.6, 1);
-//			movement = move (0.6, 2);
+			movement = move (0.6, 2);
 			
 		} else {
-			// if no nearby grass is detected, move randomly in search of water.
+			// if no nearby water is detected, move randomly in search of water.
 			movement = move(Math.random(), (int)(Math.random()*2 + 1));
 		}
 		// if no movement has occurred, keep attempting to move randomly up to 10 tries
@@ -204,53 +189,51 @@ public class Rabbit extends ImageView implements Animal {
 	}
 	
 	
+	// detect grass up to two cells away (square of side length 5 cells) and move towards the grass if it is detected. otherwise, move randomly 
 	public boolean seekFood() {
-		// flag whether movement has occured
+		
+		// flag whether movement has occurred
 		boolean movement = false;
 		
-		// rabbits can detect grass up up to two cells away (square of side length 5 cells)
+		// first check if rabbit is currently on a patch of grass
 		if (island.hasGrass(x, y) != null) {
+			
 			// rabbit is currently at a patch of grass. feed self and do not move.
 			feedSelf();
 			
-		// if grass is detected, move towards that patch of grass
-		// try to move east first if there is food towards the east
+
 		} else if (island.hasGrass(x + 1, y) != null || island.hasGrass(x + 1, y + 1) != null || island.hasGrass(x + 1, y - 1) != null || island.hasGrass(x + 1, y + 2) != null || island.hasGrass(x + 1, y - 2) != null) {
+			// try to move east first if there is food towards the east
 			movement = move(0.3, 1);
 		} else if (island.hasGrass(x + 2, y) != null || island.hasGrass(x + 2, y + 1) != null || island.hasGrass(x + 2, y - 1) != null || island.hasGrass(x + 2, y + 2) != null || island.hasGrass(x + 2, y - 2) != null) {
-//			movement = move(0.3, 2);
-			movement = move(0.3, 1);
+			movement = move(0.3, 2);
 			
-		// try to move west first if there is food towards the west
+		
 		} else if (island.hasGrass(x - 1, y) != null || island.hasGrass(x - 1, y + 1) != null || island.hasGrass(x - 1, y - 1) != null || island.hasGrass(x - 1, y + 2) != null || island.hasGrass(x - 1, y - 2) != null) {
+			// try to move west first if there is food towards the west
 			movement = move(0.8, 1);
 		} else if (island.hasGrass(x - 2, y) != null || island.hasGrass(x - 2, y + 1) != null || island.hasGrass(x - 2, y - 1) != null || island.hasGrass(x - 2, y + 2) != null || island.hasGrass(x - 2, y - 2) != null) {
-//			movement = move(0.8, 2);
-			movement = move(0.8, 1);
+			movement = move(0.8, 2);
 			
-		// if there is food directly north, head north
 		} else if (island.hasGrass(x, y - 1) != null) {
+			// if there is food directly north, head north
 			movement = move(0.1, 1);
 		} else if (island.hasGrass(x, y - 2) != null) {
-//			movement = move(0.1, 2);
-			movement = move(0.1, 1);
+			movement = move(0.1, 2);
 			
-		// if there is food directly south, head south
 		} else if (island.hasGrass(x, y + 1) != null) {
+			// if there is food directly south, head south
 			movement = move (0.6, 1);
 		} else if (island.hasGrass(x, y + 2) != null) {
-//			movement = move (0.6, 2);
-			movement = move (0.6, 1);
+			movement = move (0.6, 2);
 			
 		} else {
 			// if no nearby grass is detected, move randomly in search of food.
-//			movement = move(Math.random(), (int)(Math.random()*2 + 1));
-			movement = move(Math.random());
+			movement = move(Math.random(), (int)(Math.random()*2 + 1));
 		}
 		// if no movement has occurred, keep attempting to move randomly
 		while (!movement) {
-//			movement = move(Math.random(), (int)(Math.random()*2 + 1));
-			movement = move(Math.random());
+			movement = move(Math.random(), (int)(Math.random()*2 + 1));
 		}
 		
 		return movement;
@@ -270,7 +253,6 @@ public class Rabbit extends ImageView implements Animal {
 	public int getGridX() {
 		return x;
 	}
-//
 	public int getGridY() {
 		return y;
 	}

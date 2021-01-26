@@ -103,15 +103,16 @@ public class Kiwi extends ImageView implements Animal {
 	// food related methods
 	public boolean isHungry() {
 		// return whether energy level is below a certain threshold
-		return (energy < 6);
+		return (energy < 20);
 	}
 	
 	public boolean isThirsty() {
-		return (hydration < 6);
+		// return whether hydration level is below a certain threshold
+		return (hydration < 40);
 	}
  
 	public boolean drinkWater() {
-		// check if rabbit is at water source and increase hydration if so
+		// check if kiwi is at water source and increase hydration if so. return whether a drink was taken. 
 		if (island.hasWater(x, y)) {
 			increaseHydration(40);
 			return true;
@@ -122,7 +123,7 @@ public class Kiwi extends ImageView implements Animal {
 	
 	// kiwis can feed anywhere on grubs under the ground :) 
 	public boolean feedSelf() {
-		increaseEnergy(15);
+		increaseEnergy(20);
 		return true;
 	}
 	
@@ -134,43 +135,36 @@ public class Kiwi extends ImageView implements Animal {
 	
 
 	public boolean seekWater() {
-		// flag whether movement has occured
+		// flag whether movement has occurred
 		boolean movement = false;
 		
-		// kiwis can detect grass up up to two cells away (square of side length 5 cells)
+		// kiwis can detect water up to two grid squares away (square of side length 5 cells)
 		if (island.hasWater(x, y) != false) {
 			// kiwi is currently at a patch of water. feed self and do not move.
 			drinkWater();
 			
-			// if water is detected, move towards that patch of grass
+			// if water is detected, move towards that patch of water
+		} else if (island.hasWater(x + 1, y) || island.hasWater(x + 1, y + 1) || island.hasWater(x + 1, y - 1) || island.hasWater(x + 1, y + 2) || island.hasWater(x + 1, y - 2) || island.hasWater(x + 2, y) || island.hasWater(x + 2, y + 1) || island.hasWater(x + 2, y - 1) || island.hasWater(x + 2, y + 2) || island.hasWater(x + 2, y - 2)) {
 			// try to move east first if there is water towards the east
-		} else if (island.hasWater(x + 1, y) != false || island.hasWater(x + 1, y + 1) != false || island.hasWater(x + 1, y - 1) != false || island.hasWater(x + 1, y + 2) != false || island.hasWater(x + 1, y - 2) != false) {
-			movement = move(0.3);
-		} else if (island.hasWater(x + 2, y) != false || island.hasWater(x + 2, y + 1) != false || island.hasWater(x + 2, y - 1) != false || island.hasWater(x + 2, y + 2) != false || island.hasWater(x + 2, y - 2) != false) {
 			movement = move(0.3);
 			
+		} else if (island.hasWater(x - 1, y) || island.hasWater(x - 1, y + 1) || island.hasWater(x - 1, y - 1) || island.hasWater(x - 1, y + 2) || island.hasWater(x - 1, y - 2) || island.hasWater(x - 2, y) || island.hasWater(x - 2, y + 1) || island.hasWater(x - 2, y - 1)  || island.hasWater(x - 2, y + 2) || island.hasWater(x - 2, y - 2)) {
 			// try to move west first if there is water towards the west
-		} else if (island.hasWater(x - 1, y) != false || island.hasWater(x - 1, y + 1) != false || island.hasWater(x - 1, y - 1) != false || island.hasWater(x - 1, y + 2) != false || island.hasWater(x - 1, y - 2) != false) {
-			movement = move(0.8);
-		} else if (island.hasWater(x - 2, y) != false || island.hasWater(x - 2, y + 1) != false || island.hasWater(x - 2, y - 1) != false || island.hasWater(x - 2, y + 2) != false || island.hasWater(x - 2, y - 2) != false) {
 			movement = move(0.8);
 			
+		} else if (island.hasWater(x, y - 1) || island.hasWater(x, y - 2)) {
 			// if there is water directly north, head north
-		} else if (island.hasWater(x, y - 1) != false) {
-			movement = move(0.1);
-		} else if (island.hasWater(x, y - 2) != false) {
 			movement = move(0.1);
 			
+		} else if (island.hasWater(x, y + 1) || island.hasWater(x, y + 2)) {
 			// if there is water directly south, head south
-		} else if (island.hasWater(x, y + 1) != false) {
-			movement = move (0.6);
-		} else if (island.hasWater(x, y + 2) != false) {
 			movement = move (0.6);
 			
 		} else {
-			// if no nearby water is detected, move randomly in search of food.
+			// if no nearby water was detected, move randomly in search of food.
 			movement = move(Math.random());
 		}
+		
 		// if no movement has occurred, keep attempting to move randomly up to 10 tries
 		int numTries = 0;
 		while (!movement && numTries < 10) {

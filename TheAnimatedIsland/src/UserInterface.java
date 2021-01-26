@@ -46,9 +46,9 @@ public class UserInterface extends Application {
 		
 		// create island
 		island = new Island(gridWidth, gridHeight, gridSize);
-		island.genAnimals(20);
-		island.genGrass(40);
-		island.genWater(20);
+		island.genAnimals(30);
+		island.genGrass(60);
+		island.genWater(40);
 		island.reportNumAnimals();
 
 		// fetch animals and geographic features

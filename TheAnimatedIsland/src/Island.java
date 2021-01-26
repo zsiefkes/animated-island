@@ -22,8 +22,7 @@ public class Island {
 		this.gridSize = gridSize;
 	}
 
-	// check if a grass patch is the coordinate in argument and return the Grass
-	// object if so
+	// check if a grass patch is the coordinate in argument and return the Grass object if so
 	public Grass hasGrass(int x, int y) {
 
 		// Grass to return
@@ -323,47 +322,38 @@ public class Island {
 		// loop over all animals
 		for (Animal a : this.animals) {
 
-			// for now just try move randomly *palm face*
-//			boolean movement = a.move(Math.random()); 
-//			while (movement == false) {
-//				movement = a.move(Math.random());
-//			}
-			
-			// something is wrong with the below code.... kiwis aren't moving at all, rabbits disappearing and reappearing :S everything dies
-			
-			
 			// check if animal is hungry
 			if (a.isHungry()) {
-
-				// have animal check for an immediate food source and spend this turn feeding if so.
-				// if animal is hungry but not at a food source, have the animal seek out food.
-				// this method should invoke movement in the direction of the food source.
+				
+				// if animal is hungry, have them check for an immediate food source and spend this turn feeding if so. if not at a food source, the will animal seek food and move in the direction of nearby food, or move randomly if no food is detected nearby.
 				a.seekFood();
 
+			// check if animal is thirsty
 			} else if (a.isThirsty()) {
 				
 				// if the animal is not at a water source,
 				if (!a.drinkWater()) {
 					
-					// attempt to move toward a water source
+					// attempt to move toward a water source, or move randomly if no nearby water is detected
 					a.seekWater();
 					
 				} else {
-					// drink that water
+					// if the animal is by a water source, drink that water
 					a.drinkWater();
 				}
 				
 			} else {
-				// have the animal attempt to move in a random direction until a movement happens (the direction to move in isn't blocked) up to 20 tries
+				// have the animal attempt to move in a random direction until a movement happens (the direction to move in isn't occupied by another animal) up to 20 tries
 				boolean movement = a.move(Math.random());
 				int count = 0;
 				while (movement == false && count < 20) {
 					movement = a.move(Math.random());
 					count++;
 				}
+				System.out.println(a.getSymbol() + " is moving randomly");
 			}
 
-			// reduce all animal's energy and hydration level by default amount
+			// reduce all animal's energy and hydration level the default amount
 			a.decreaseEnergy();
 			a.decreaseHydration();
 
